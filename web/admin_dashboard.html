@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        /* Custom sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px; /* Start off with the sidebar closed */
+            bottom: 0;
+            z-index: 100; /* Make sure it's on top of everything */
+            padding: 60px 0 0; /* Height of navbar */
+            width: 250px;
+            transition: all 0.3s ease;
+            box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.1);
+            background-color: #4CAF50; /* Sidebar background color */
+            color: #fff; /* Text color */
+        }
+
+        .sidebar.active {
+            left: 0; /* Open the sidebar when active class is added */
+        }
+
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 60px);
+            padding-top: 0.5rem;
+            overflow-x: hidden;
+            overflow-y: auto; /* Scrollable contents if viewport is shorter than content */
+        }
+
+        .sidebar-heading {
+            padding: 0.875rem 1.25rem;
+            font-size: 1.2rem;
+            background-color: #357a38;
+            margin-bottom: 20px;
+        }
+
+        /* Main content style */
+        .main-content {
+            transition: all 0.3s ease;
+            background-color: #E8F5E9; /* Light green */
+            padding: 20px;
+            height: 100vh;
+        }
+
+        /* Active state for main content when sidebar is active */
+        .main-content.active {
+            margin-left: 250px; /* Adjust this based on the width of your sidebar */
+        }
+
+        /* Sidebar icons style */
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+
+        /* Active state */
+        .sidebar .nav-item.active {
+            background-color: #3e577c;
+        }
+
+        .sidebar .nav-item.active .nav-link {
+            color: #fff;
+        }
+
+        /* Toggle button style */
+        #sidebarCollapse {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            z-index: 101; /* Make sure it's above the sidebar */
+        }
+
+        #sidebarCollapse i {
+            color: #fff;
+            transition: transform 0.3s ease;
+        }
+
+        #sidebarCollapse.active i {
+            transform: rotate(180deg);
+        }
+
+        /* Overlay style */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semitransparent black */
+            z-index: 99; /* Ensure the overlay is above everything except sidebar */
+            display: none; /* Initially hidden */
+        }
+
+        /* Active state for overlay */
+        #overlay.active {
+            display: block; /* Show the overlay when active */
+        }
+
+        /* Menu item hover effect */
+        .sidebar .nav-item .nav-link:hover {
+            background-color: #3e577c; /* Darker background on hover */
+        }
+
+        /* Animasi lucu yang menarik perhatian */
+        .fun-animation {
+            width: 300px; /* Sesuaikan ukuran dengan gambar */
+            height: 300px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999; /* Pastikan gambar selalu di atas konten */
+        }
+
+        /* CSS untuk menyembunyikan tombol kontrol Lottie */
+        .lottie-player-controls {
+            display: none !important; /* Menghilangkan tombol kontrol Lottie */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Toggle button -->
+    <div id="sidebarCollapse">
+        <i class="fas fa-bars fa-2x"></i>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="bg-light sidebar">
+        <div class="position-sticky">
+            <div class="sidebar-sticky">
+                <div class="sidebar-heading">Admin Dashboard</div>
+                <ul class="nav flex-column">
+                    <!-- Menu Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link active" href="admin_dashboard.html">
+                            <i class="fas fa-chart-pie"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <!-- Menu Kelola Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="data_admin.html">
+                            <i class="fas fa-user-cog"></i>
+                            Kelola Admin
+                        </a>
+                    </li>
+                    <!-- Menu Kelola Pemilik -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="data_pemilik.html">
+                            <i class="fas fa-user"></i>
+                            Kelola Pemilik
+                        </a>
+                    </li>
+                    <!-- Menu Kelola Petugas -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="data_petugas.html">
+                            <i class="fas fa-user-tie"></i>
+                            Kelola Petugas
+                        </a>
+                    </li>
+                    <!-- Menu Kelola Transaksi -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="kelola_transaksi.html">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Kelola Transaksi
+                        </a>
+                    </li>
+                    <!-- Menu Laporan Keuangan -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="laporan_keuangan.html">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Laporan Keuangan
+                        </a>
+                    </li>
+                    <!-- Menu Edit Profil -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="edit_profil.html">
+                            <i class="fas fa-user-edit"></i>
+                            Edit Profil
+                        </a>
+                    </li>
+                    <!-- Tombol Logout -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.html" id="logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <div class="container">
+            <h1 class="mt-4">Welcome to Admin Dashboard!</h1>
+            <p class="lead">Silahkan Melakukan Kelola Data Sebagai User Admin.</p>
+            <!-- Animasi Lottie yang menarik perhatian -->
+            <lottie-player class="fun-animation" src="https://lottie.host/cfaea358-43ab-4a78-9c10-198e298cf1e5/fhFZqkgn2G.json" background="" speed="1" style="width: 300px; height: 300px" loop autoplay direction="1" mode="normal"></lottie-player>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Font Awesome script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+
+    <!-- Lottie Player script -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <!-- JavaScript untuk mengontrol sidebar -->
+    <script>
+        document.getElementById('sidebarCollapse').addEventListener('click', function() {
+            document.getElementById('sidebarMenu').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+            this.classList.toggle('active');
+        });
+
+        // Fungsi logout
+        function logout() {
+            // Lakukan penanganan logout di sini, seperti menghapus token sesi, membersihkan data pengguna, dll.
+
+            // Mengganti URL dalam riwayat browser dengan login.html
+            history.replaceState(null, null, "login.html");
+
+            // Redirect ke halaman login.html
+            window.location.href = "login.html";
+        }
+
+        // Event listener untuk tombol logout
+        document.querySelector('.nav-link[href="logout.html"]').addEventListener('click', function(event) {
+            // Mencegah default behavior dari tautan
+            event.preventDefault();
+            // Memanggil fungsi logout
+            logout();
+        });
+
+        // Mencegah pengguna kembali ke halaman sebelumnya setelah logout
+        window.addEventListener('popstate', function (event) {
+            // Redirect ke halaman login.html
+            window.location.href = "login.html";
+        });
+
+        // Setelah Lottie Player dimuat
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mengambil elemen Lottie Player
+            var lottiePlayer = document.querySelector('.fun-animation');
+            
+            // Menghapus tombol kontrol
+            lottiePlayer.addEventListener('load', function () {
+                lottiePlayer.querySelector('.lottie-player-controls').remove();
+            });
+        });
+    </script>
+</body>
+</html>

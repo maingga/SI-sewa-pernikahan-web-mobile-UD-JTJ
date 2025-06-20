@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Keuangan</title>
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Gaya CSS -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #254e27;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin: 20px auto;
+            position: relative;
+            height: 400px;
+        }
+
+        #myChart {
+            height: 100%;
+        }
+
+        #totalProfit {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .print-button:hover {
+            background-color: #45a049;
+        }
+
+        .print-button i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-file-invoice"></i> Laporan Keuangan</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Tanggal Transaksi</th>
+                    <th>Total Harga (Rp)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="financialReportBody">
+                <!-- Data transaksi akan dimuat di sini -->
+            </tbody>
+        </table>
+
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div id="totalProfit"></div>
+
+        <button id="pdfButton" class="print-button"><i class="fas fa-file-pdf"></i> Unduh PDF</button>
+    </div>
+
+    <!-- Tautan ke Chart.js untuk grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Tautan ke jsPDF dan jsPDF-AutoTable untuk PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <!-- Skrip Firebase dan JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const financialReportBody = document.getElementById('financialReportBody');
+            const totalProfitElement = document.getElementById('totalProfit');
+
+            async function displayFinancialReport() {
+                let totalProfit = 0;
+                const promises = [];
+
+                const querySnapshot = await getDocs(collection(db, 'orders'));
+                querySnapshot.forEach(orderDoc => {
+                    const orderData = orderDoc.data();
+                    
+                    // Filter only orders with status "Selesai"
+                    if (orderData.status === "Selesai") {
+                        const promise = getUsername(orderData.userId).then(username => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${username}</td>
+                                <td>${new Date(orderData.startDate.seconds * 1000).toLocaleDateString()}</td>
+                                <td>Rp ${orderData.totalPrice.toLocaleString('id-ID')}</td>
+                                <td>${orderData.status}</td>
+                            `;
+                            financialReportBody.appendChild(row);
+
+                            // Add to total profit
+                            totalProfit += orderData.totalPrice;
+                        });
+                        promises.push(promise);
+                    }
+                });
+
+                // Wait for all asynchronous requests to complete
+                await Promise.all(promises);
+
+                // Display total profit
+                totalProfitElement.textContent = 'Total Keuntungan: Rp ' + totalProfit.toLocaleString('id-ID');
+
+                // Get data for chart
+                const totalPrices = querySnapshot.docs
+                    .filter(doc => doc.data().status === "Selesai")
+                    .map(doc => doc.data().totalPrice);
+                createChart(totalPrices);
+            }
+
+            // Function to get username based on userId
+            async function getUsername(userId) {
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                return userDoc.exists() ? userDoc.data().username : 'Unknown User';
+            }
+
+            // Function to create chart using Chart.js
+            function createChart(data) {
+                const ctx = document.getElementById('myChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Array.from({ length: data.length }, (_, i) => `Transaksi ${i + 1}`),
+                        datasets: [{
+                            label: 'Total Harga (Rp)',
+                            data: data,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return 'Rp ' + value.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: function (tooltipItems) {
+                                        let total = 0;
+                                        tooltipItems.forEach(function (tooltipItem) {
+                                            total += tooltipItem.raw;
+                                        });
+                                        return 'Total Keuntungan: Rp ' + total.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Call function to display financial report
+            await displayFinancialReport();
+        });
+
+        // Function to create PDF report
+        async function createPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(18);
+            doc.text('Laporan Keuangan', 14, 22);
+
+            // Add date
+            const date = new Date();
+            doc.setFontSize(12);
+            doc.text(`Tanggal: ${date.toLocaleDateString('id-ID')}`, 14, 30);
+
+            // Get table data
+            const headers = [["Username", "Tanggal Transaksi", "Total Harga (Rp)", "Status"]];
+            const data = [];
+            const rows = document.querySelectorAll("#financialReportBody tr");
+            rows.forEach(row => {
+                const cols = row.querySelectorAll("td");
+                const rowData = [];
+                cols.forEach(col => {
+                    rowData.push(col.innerText);
+                });
+                data.push(rowData);
+            });
+
+            // Add table to PDF
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 40,
+                theme: 'striped'
+            });
+
+            // Add total profit
+            const totalProfit = document.getElementById('totalProfit').innerText;
+            doc.text(totalProfit, 14, doc.lastAutoTable.finalY + 10);
+
+            // Save the PDF
+            doc.save('Laporan_Keuangan.pdf');
+        }
+
+        // Event listener for the PDF button
+        document.getElementById('pdfButton').addEventListener('click', createPDF);
+    </script>
+</body>
+
+</html>

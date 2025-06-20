@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .login-container {
+            text-align: center;
+        }
+        .login-container img {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+        .input-group .fa {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <img src="images/wedding.png" alt="Company Logo">
+    <h2>Silahkan Login</h2>
+    <form id="loginForm">
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+    apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+    authDomain: "jokotarubjingga.firebaseapp.com",
+    projectId: "jokotarubjingga",
+    storageBucket: "jokotarubjingga.appspot.com",
+    messagingSenderId: "314491904917",
+    appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+    measurementId: "G-S81G53WE6Z"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const loginForm = document.getElementById('loginForm');
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = loginForm['email'].value;
+        const password = loginForm['password'].value;
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            const adminDoc = await getDoc(doc(db, "admins", user.uid));
+            if (adminDoc.exists()) {
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
+
+            const ownerDoc = await getDoc(doc(db, "owners", user.uid));
+            if (ownerDoc.exists()) {
+                window.location.href = 'pemilik_dashboard.html';
+                return;
+            }
+
+            alert('You do not have permission to access the admin area or your account does not exist.');
+
+        } catch (error) {
+            console.error(error);
+            alert('Login failed. Please check your email and password.');
+        }
+    });
+</script>
+
+</body>
+</html>

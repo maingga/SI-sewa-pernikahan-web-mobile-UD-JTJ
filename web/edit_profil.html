@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profil</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts - Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Center align content */
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .lead {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        #profileInfo {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        #profileInfo img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Center align buttons */
+            gap: 20px; /* Spacing between buttons */
+            margin-top: 20px; /* Space between profile info and buttons */
+        }
+
+        .btn-primary {
+            background-color: #4CAF50; /* Green color */
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049; /* Darker green color on hover */
+        }
+
+        .edit-icon {
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Profil <i class="fas fa-user-edit edit-icon"></i></h1>
+        <p class="lead">Anda dapat mengedit profil Anda di sini.</p>
+        <div id="profileInfo">
+            <!-- Profile information will be dynamically populated here -->
+        </div>
+        <div class="btn-container">
+            <button id="changeProfileBtn" class="btn btn-primary"><i class="fas fa-camera"></i> Ganti Foto Profil</button>
+            <button id="changeUsernameBtn" class="btn btn-primary"><i class="fas fa-user-edit"></i> Ganti Username</button>
+            <button id="changePasswordBtn" class="btn btn-primary"><i class="fas fa-lock"></i> Ganti Password</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getFirestore, doc, getDoc, updateDoc, deleteField } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+        import { getAuth, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            // Your Firebase Config
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        let userId; // Global variable to store user ID
+
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                userId = user.uid; // Set user ID after user login
+                const docRef = doc(db, "admins", userId);
+                getDoc(docRef).then((doc) => {
+                    if (doc.exists()) {
+                        const adminData = doc.data();
+                        document.getElementById("profileInfo").innerHTML = `
+                            <img id="profilePic" src="${adminData.photoURL}" alt="Profil">
+                            <div>
+                                <p><strong>Username:</strong> <span id="username">${adminData.username}</span></p>
+                                <p><strong>Email:</strong> ${adminData.email}</p>
+                            </div>
+                        `;
+                    } else {
+                        console.log("Profil admin tidak ditemukan!");
+                    }
+                }).catch((error) => {
+                    console.log("Error getting document:", error);
+                });
+            } else {
+                console.log("Tidak ada pengguna yang masuk.");
+            }
+        });
+
+        document.getElementById("changeProfileBtn").addEventListener("click", changeProfilePicture);
+        document.getElementById("changeUsernameBtn").addEventListener("click", changeUsername);
+        document.getElementById("changePasswordBtn").addEventListener("click", changePassword);
+
+        async function changeProfilePicture() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+
+            input.onchange = async function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    try {
+                        // Menghapus foto lama dari Firebase Storage
+                        const docRef = doc(db, 'admins', userId);
+                        const docSnap = await getDoc(docRef);
+                        const adminData = docSnap.data();
+                        if (adminData && adminData.photoURL) {
+                            const oldPhotoRef = ref(storage, adminData.photoURL);
+                            await deleteObject(oldPhotoRef);
+                        }
+
+                        // Mengunggah foto baru ke Firebase Storage
+                        const storageRef = ref(storage, 'profile_photos/' + file.name);
+                        await uploadBytes(storageRef, file);
+                        const url = await getDownloadURL(storageRef);
+
+                        // Memperbarui URL foto di Firestore dan profil pengguna
+                        await updateDoc(docRef, {
+                            photoURL: url
+                        });
+                        await updateProfile(auth.currentUser, {
+                            photoURL: url
+                        });
+
+                        console.log('Foto profil berhasil diperbarui.');
+                        alert('Foto profil berhasil diperbarui.');
+
+                        // Perbarui tampilan gambar profil
+                        document.getElementById("profilePic").src = url;
+                    } catch (error) {
+                        console.error('Gagal memperbarui foto profil:', error);
+                        alert('Gagal memperbarui foto profil: ' + error.message);
+                    }
+                }
+            };
+
+            input.click();
+        }
+
+        async function changeUsername() {
+            const newUsername = prompt('Masukkan username baru:');
+            if (newUsername) {
+                try {
+                    await updateProfile(auth.currentUser, {
+                        displayName: newUsername
+                    });
+                    await updateDoc(doc(db, 'admins', userId), {
+                        username: newUsername
+                    });
+                    console.log('Username berhasil diperbarui.');
+                    alert('Username berhasil diperbarui.');
+
+                    // Perbarui tampilan username yang sudah ada
+                    document.getElementById("username").textContent = newUsername;
+                } catch (error) {
+                    console.error('Gagal memperbarui username:', error);
+                    alert('Gagal memperbarui username: ' + error.message);
+                }
+            }
+        }
+
+        async function changePassword() {
+            const currentPassword = prompt('Masukkan password saat ini:');
+            if (currentPassword) {
+                const newPassword = prompt('Masukkan password baru:');
+                if (newPassword) {
+                    try {
+                        // Reauthenticate the user with their current credentials
+                        const credentials = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+                        await reauthenticateWithCredential(auth.currentUser, credentials);
+
+                        // If reauthentication is successful, proceed with changing the password
+                        await updatePassword(auth.currentUser, newPassword);
+                        console.log('Password berhasil diperbarui.');
+                        alert('Password berhasil diperbarui.');
+                    } catch (error) {
+                        console.error('Gagal memperbarui password:', error);
+                        alert('Gagal memperbarui password: ' + error.message);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

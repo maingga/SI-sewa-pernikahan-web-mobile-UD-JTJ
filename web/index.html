@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio UD Joko Tarub Jingga</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Script untuk Lottie Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        /* Custom CSS for modern design */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ecc88a;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #8b4513;
+            /* Cokelat tua */
+            padding: 20px 0;
+            color: #fac800;
+            text-align: center;
+            animation: fadeInUp 1s ease;
+        }
+
+        header h1,
+        header p {
+            margin: 0;
+        }
+
+        #lottieAnimation {
+            display: inline-block;
+            margin-right: 20px;
+            width: 80px;
+            height: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            background-color: #8b4513;
+            /* Cokelat tua */
+            padding: 10px 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: #feccad;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #ffd700;
+            /* Emas */
+        }
+
+        section {
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #8b4513;
+            /* Cokelat tua */
+            animation: fadeInUp 1s ease;
+        }
+
+        .portfolio-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .portfolio-item img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            background-color: #8b4513;
+            /* Cokelat tua */
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Keyframes */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animasi ikon */
+        .icon {
+            font-size: 48px;
+            transition: transform 0.3s ease;
+        }
+
+        .icon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Animasi wedding */
+        .wedding-animation {
+            animation: heartBeat 1s infinite;
+        }
+
+        @keyframes heartBeat {
+            0% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.1);
+            }
+
+            50% {
+                transform: scale(1);
+            }
+
+            75% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Testimonial grid */
+        .testimonial {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            text-align: left;
+            background-color: #fff;
+        }
+
+        .testimonial img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .testimonial h3 {
+            margin-bottom: 10px;
+            color: #8b4513;
+        }
+
+        .testimonial p {
+            margin-bottom: 0;
+        }
+
+        /* Social Media Icons */
+        .social-media {
+            margin-top: 20px;
+        }
+
+        .social-media a {
+            color: #fff;
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        /* Tata Letak dan Penyempurnaan Desain */
+        #lottieAnimation {
+            width: 100px;
+            height: 100px;
+        }
+
+        section#home {
+            background-color: #ffe8c9;
+        }
+
+        section#home h2 {
+            color: #8b4513;
+        }
+
+        section#home p {
+            color: #555;
+        }
+
+        /* Portfolio */
+        section#portfolio {
+            background-color: #fff;
+        }
+
+        section#portfolio h2 {
+            color: #8b4513;
+        }
+
+        .portfolio-item {
+            margin-bottom: 30px;
+        }
+
+        .portfolio-item img {
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .portfolio-item img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Services */
+        section#services {
+            background-color: #ffe8c9;
+        }
+
+        section#services h2 {
+            color: #8b4513;
+        }
+
+        .service-item {
+            margin-bottom: 30px;
+        }
+
+        .service-item i {
+            font-size: 48px;
+            color: #8b4513;
+        }
+
+        .service-item h3 {
+            color: #333;
+        }
+
+        /* Testimonials */
+        section#testimonials {
+            background-color: #fff;
+        }
+
+        section#testimonials h2 {
+            color: #8b4513;
+        }
+
+        .testimonial {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .testimonial img {
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .testimonial h3 {
+            color: #8b4513;
+        }
+
+        .testimonial p {
+            color: #555;
+        }
+
+        /* Contact */
+        section#contact {
+            background-color: #ffe8c9;
+        }
+
+        section#contact h2 {
+            color: #8b4513;
+        }
+
+        section#contact p {
+            color: #555;
+        }
+
+        .social-media a {
+            color: #8b4513;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <div>
+                <lottie-player 
+                    id="lottieAnimation"
+                    src="https://lottie.host/e4c82634-27fe-4216-8559-166b60df6639/7cgekWYFHx.json" 
+                    background="" 
+                    speed="1" 
+                    style="width: 80px; height: 80px; margin-right: 20px;" 
+                    loop 
+                    autoplay 
+                    mode="normal">
+                </lottie-player>
+            </div>
+            <div>
+                <h1>UD Joko Tarub Jingga</h1>
+                <p>Persewaan Paket Alat dan Dekorasi Pernikahan</p>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#home"><i class="fas fa-home icon"></i> Beranda</a></li>
+                <li><a href="#portfolio"><i class="fas fa-images icon"></i> Portfolio</a></li>
+                <li><a href="#services"><i class="fas fa-cogs icon"></i> Layanan</a></li>
+                <li><a href="#testimonials"><i class="fas fa-star icon"></i> Testimoni</a></li>
+                <li><a href="#contact"><i class="fas fa-phone-alt icon"></i> Kontak</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <lottie-player 
+                            id="lottieAnimation"
+                            src="https://lottie.host/2df9821b-696c-4e32-9b2f-6dab58282991/GEASqgYTqz.json" 
+                            background="" 
+                            speed="1" 
+                            style="width: 300px; height: 300px; margin-right: 20px;" 
+                            loop 
+                            autoplay 
+                            mode="normal">
+                        </lottie-player>
+                    </div>
+                    <div class="col-md-6">
+                        <h2 class="display-4 mb-4">Selamat Datang di UD Joko Tarub Jingga</h2>
+                        <p class="lead">Kami mengkhususkan diri dalam menyediakan layanan dekorasi dan persewaan peralatan pernikahan. Jelajahi portfolio kami untuk melihat paket dan dekorasi kami sebelumnya.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="portfolio">
+            <div class="container">
+                <h2>Portfolio</h2>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="portfolio-item">
+                            <img src="images/wedding1.png" alt="Dekorasi Pernikahan 1">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="portfolio-item">
+                            <img src="images/wedding2.png" alt="Dekorasi Pernikahan 2">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="portfolio-item">
+                            <img src="images/wedding3.png" alt="Dekorasi Pernikahan 3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services">
+            <div class="container">
+                <h2>Layanan Kami</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <i class="fas fa-glass-cheers icon"></i>
+                        <h3>Dekorasi</h3>
+                        <p>Kami menawarkan berbagai tema dekorasi pernikahan untuk membuat hari spesial Anda tak terlupakan.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-chair icon"></i>
+                        <h3>Persewaan Alat</h3>
+                        <p>Dari meja dan kursi hingga pencahayaan dan sistem suara, kami memiliki semua yang Anda butuhkan untuk pernikahan Anda.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-hand-holding-heart icon"></i>
+                        <h3>Kustomisasi</h3>
+                        <p>Butuh sesuatu yang unik? Kami dapat menyesuaikan dekorasi dan pengaturan sesuai dengan preferensi Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials">
+            <div class="container">
+                <h2>Testimoni</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="testimonial">
+                            <img src="images/client1.jpg" alt="Klien 1">
+                            <h3>Septiana</h3>
+                            <p>"Layanan yang luar biasa! Dekorasinya melebihi harapan kami. Sangat direkomendasikan!"</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial">
+                            <img src="images/client2.jpg" alt="Klien 2">
+                            <h3>Oftarin</h3>
+                            <p>"UD Joko Tarub Jingga membuat hari pernikahan kami benar-benar ajaib. Terima kasih atas kerja kerasnya!"</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial">
+                            <img src="images/client3.jpg" alt="Klien 3">
+                            <h3>Anita</h3>
+                            <p>"Profesional dan dapat diandalkan. kami merasa terbantu karena memiliki tim yang lebih baik untuk bekerja sama."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="container">
+                <h2>Kontak Kami</h2>
+                <p>Untuk pertanyaan dan pemesanan, silakan hubungi kami:</p>
+                <p>Email: nurhayatipagu76@gmail.com</p>
+                <p>Telepon: 0812-3266-5797</p>
+                <p>Ikuti kami di media sosial:</p>
+                <div class="social-media">
+                    <a href="https://wa.me/081232665797"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 UD Joko Tarub Jingga. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

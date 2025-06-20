@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Pemilik</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Form style */
+        form {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Image preview style */
+        #imagePreview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #imagePreview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        /* Icon style */
+        .icon {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kelola Pemilik</h1>
+        <!-- Formulir untuk menambah data pemilik -->
+        <form id="addOwnerForm">
+            <label for="username"> <i class="fas fa-user icon"></i> Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <label for="email"> <i class="fas fa-envelope icon"></i> Email:</label><br>
+            <input type="email" id="email" name="email"><br>
+            <label for="password"> <i class="fas fa-lock icon"></i> Password:</label><br>
+            <input type="password" id="password" name="password"><br>
+            <label for="photo"> <i class="fas fa-image icon"></i> Foto Profil:</label><br>
+            <input type="file" id="photo" name="photo"><br>
+            <input type="submit" value="Tambah Pemilik">
+        </form>
+        <!-- Preview gambar -->
+        <div id="imagePreview">
+            <img id="previewImg" src="#" alt="Foto Profil" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+    apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+    authDomain: "jokotarubjingga.firebaseapp.com",
+    projectId: "jokotarubjingga",
+    storageBucket: "jokotarubjingga.appspot.com",
+    messagingSenderId: "314491904917",
+    appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+    measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app); // Get the Auth instance
+        const storage = getStorage(app); // Get the Storage instance
+        const db = getFirestore(app); // Get the Firestore instance
+
+        // Function to add owner data
+        function addOwner() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const photo = document.getElementById('photo').files[0];
+
+            // Register new owner with email and password
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Successfully created new owner
+                    console.log('Owner successfully added:', userCredential.user.uid);
+                    // Upload photo to Firebase Storage
+                    const storageRef = ref(storage, 'profile_photos/' + userCredential.user.uid);
+                    const uploadTask = uploadBytes(storageRef, photo);
+
+                    // Handle progress, success, and errors
+                    uploadTask.then((snapshot) => {
+                        console.log('Upload is complete');
+                        // Get download URL and add owner data to Firestore
+                        getDownloadURL(snapshot.ref).then((downloadURL) => {
+                            console.log('File available at', downloadURL);
+                            // Add owner data to Firestore
+                            setDoc(doc(collection(db, 'owners'), userCredential.user.uid), {
+                                username: username,
+                                email: email,
+                                photoURL: downloadURL // Save photo URL in Firestore
+                            })
+                            .then(() => {
+                                console.log('Owner data added to Firestore.');
+                                alert('Owner successfully added!');
+                                // Clear form after adding owner
+                                document.getElementById('addOwnerForm').reset();
+                                // Clear image preview
+                                document.getElementById('previewImg').style.display = 'none';
+                            })
+                            .catch((error) => {
+                                console.error('Error adding owner data:', error);
+                                alert('An error occurred. Please try again.');
+                            });
+                        });
+                    }).catch((error) => {
+                        // Error
+                        console.error('Error uploading photo:', error);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error creating new owner:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+
+        // Event listener for form submission
+        document.getElementById('addOwnerForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            addOwner(); // Call function to add owner
+        });
+
+        // Event listener to display image preview before uploading
+        document.getElementById('photo').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewImg').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>

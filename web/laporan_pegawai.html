@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Pegawai</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Add this for horizontal scrolling */
+        }
+
+        h1 {
+            text-align: center;
+            color: #254e27;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .photos-cell {
+            text-align: center;
+            width: 200px;
+        }
+
+        .photos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .photo-wrapper {
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .photo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .address-cell,
+        .note-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .date-cell {
+            min-width: 150px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .fa-icon {
+            margin-right: 5px;
+        }
+
+        .delete-button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .delete-button:hover {
+            color: #c0392b;
+        }
+
+        @media screen and (max-width: 600px) {
+            table {
+                display: block;
+                width: 100%;
+                overflow-x: auto; /* Enable horizontal scrolling */
+            }
+
+            thead, tbody, tr {
+                display: block;
+                width: 100%;
+            }
+
+            th, td {
+                padding: 10px;
+                text-align: right;
+                position: relative;
+                display: block;
+                width: 100%;
+            }
+
+            th::before, td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding: 10px;
+                background-color: #f2f2f2;
+                color: #555;
+                text-transform: uppercase;
+                font-weight: bold;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .delete-button {
+                text-align: center;
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-users fa-icon"></i> Laporan Pegawai</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th data-label="Photos"><i class="fas fa-camera fa-icon"></i> Photos</th>
+                    <th data-label="Alamat"><i class="fas fa-map-marker-alt fa-icon"></i> Alamat</th>
+                    <th data-label="Keterangan"><i class="fas fa-sticky-note fa-icon"></i> Keterangan</th>
+                    <th data-label="Tanggal Mulai"><i class="far fa-calendar-alt fa-icon"></i> Tanggal Mulai</th>
+                    <th data-label="Tanggal Selesai"><i class="far fa-calendar-alt fa-icon"></i> Tanggal Selesai</th>
+                    <th data-label="Aksi">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="pegawaiTableBody">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+        import { getStorage, ref, deleteObject } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const pegawaiTableBody = document.getElementById('pegawaiTableBody');
+
+            async function displayPegawai() {
+                try {
+                    const querySnapshot = await getDocs(collection(db, 'pegawai_data'));
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+
+                        // Extracting data fields
+                        const photos = data.photoUrls || [];
+                        const address = data.address || '';
+                        const keterangan = data.note || '';
+                        const startDate = data.startDate ? data.startDate.toDate() : null;
+                        const endDate = data.endDate ? data.endDate.toDate() : null;
+
+                        // Building HTML for table row
+                        let photosHtml = '<div class="photos-container">';
+                        photos.forEach(photoUrl => {
+                            photosHtml += `
+                                <div class="photo-wrapper">
+                                    <img src="${photoUrl}" alt="Photo">
+                                </div>
+                            `;
+                        });
+                        photosHtml += '</div>';
+
+                        // Format dates if they are valid Date objects
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Options for Indonesian date format
+                        const startDateString = startDate ? startDate.toLocaleDateString('id-ID', options) : '';
+                        const endDateString = endDate ? endDate.toLocaleDateString('id-ID', options) : '';
+
+                        row.innerHTML = `
+                            <td class="photos-cell" data-label="Photos">${photosHtml}</td>
+                            <td class="address-cell" data-label="Alamat">${address}</td>
+                            <td class="note-cell" data-label="Keterangan">${keterangan}</td>
+                            <td class="date-cell" data-label="Tanggal Mulai">${startDateString}</td>
+                            <td class="date-cell" data-label="Tanggal Selesai">${endDateString}</td>
+                            <td class="text-center" data-label="Aksi"><button class="delete-button" data-id="${doc.id}"><i class="fas fa-trash-alt"></i></button></td>
+                        `;
+
+                        // Append row to table body
+                        pegawaiTableBody.appendChild(row);
+                    });
+
+                    // Add delete functionality
+                    document.querySelectorAll('.delete-button').forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const id = e.target.closest('button').getAttribute('data-id');
+                            const docRef = doc(db, 'pegawai_data', id);
+                            const docSnapshot = await getDoc(docRef);
+                            const data = docSnapshot.data();
+                            const photos = data.photoUrls || [];
+
+                            // Delete photos from storage
+                            const deletePromises = photos.map(async (photoUrl) => {
+                                const photoRef = ref(storage, photoUrl);
+                                await deleteObject(photoRef);
+                            });
+
+                            // Wait for all photos to be deleted
+                            await Promise.all(deletePromises);
+
+                            // Delete document from Firestore
+                            await deleteDoc(docRef);
+                            window.location.reload(); // Refresh the page after deletion
+                        });
+                    });
+
+                } catch (error) {
+                    console.error("Error fetching employees: ", error);
+                }
+            }
+
+            await displayPegawai();
+        });
+    </script>
+</body>
+
+</html>

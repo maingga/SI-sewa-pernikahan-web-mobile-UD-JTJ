@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Paket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button.add {
+            background-color: #4CAF50;
+        }
+
+        .button.edit,
+        .button.delete {
+            background-color: #ff3333;
+        }
+
+        .button i {
+            margin-right: 5px;
+        }
+
+        .edit-form {
+            border: 2px solid #4CAF50;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="file"],
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 10px);
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="file"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #4CAF50;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            text-align: center;
+        }
+
+        .action-buttons .button {
+            margin-right: 10px;
+        }
+
+        .edit-form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        .add-package-button {
+            align-self: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2><i class="fas fa-box"></i> Kelola Paket</h2>
+        <button class="button add add-package-button" id="addPackageButton" onclick="window.location.href='tambah_paket.html'"><i class="fas fa-plus"></i> Tambah Paket</button>
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-heading"></i> Nama</th>
+                    <th><i class="fas fa-info-circle"></i> Deskripsi</th>
+                    <th><i class="fas fa-dollar-sign"></i> Harga</th>
+                    <th><i class="fas fa-image"></i> Gambar</th>
+                    <th><i class="fas fa-cogs"></i> Tindakan</th>
+                    <th><i class="fas fa-info-circle"></i> Status</th> <!-- Kolom Status -->
+                </tr>
+            </thead>
+            <tbody id="packageTableBody">
+                <!-- Data dari Firestore akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Detail View -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h3 id="modalName"></h3>
+            <p id="modalDescription"></p>
+            <p id="modalPrice"></p>
+            <img id="modalImage" src="" alt="Image" style="max-width: 100%; border-radius: 8px;">
+            <p id="modalStatus"></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+        import { getStorage, ref, deleteObject, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Function to format price with thousands separator
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Function to display packages from Firestore
+        async function displayPackages() {
+            const packageTableBody = document.getElementById("packageTableBody");
+            const querySnapshot = await getDocs(collection(db, "paket"));
+            packageTableBody.innerHTML = ""; // Clear the table body
+            querySnapshot.forEach((doc) => {
+                const packageData = doc.data();
+                const formattedPrice = "Rp " + formatPrice(packageData.price.replace('Rp ', ''));
+                const row = `
+                    <tr id="${doc.id}">
+                        <td>${packageData.name}</td>
+                        <td class="description">${packageData.description}</td>
+                        <td>${formattedPrice}</td>
+                        <td><img src="${packageData.imageUrl}" alt="${packageData.name}" width="100"></td>
+                        <td>
+                            <button class="button deleteButton" data-id="${doc.id}" data-url="${packageData.imageUrl}"><i class="fas fa-trash-alt"></i> Hapus</button>
+                            <button class="button editButton" data-id="${doc.id}"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="button detailButton" data-id="${doc.id}"><i class="fas fa-info-circle"></i> Detail</button>
+                        </td>
+                        <td>
+                            ${packageData.status}
+                        </td>
+                    </tr>
+                `;
+                packageTableBody.innerHTML += row;
+            });
+
+            // Add event listeners to buttons
+            const deleteButtons = document.getElementsByClassName("deleteButton");
+            for (let button of deleteButtons) {
+                button.addEventListener("click", async () => {
+                    const packageId = button.getAttribute("data-id");
+                    const imageUrl = button.getAttribute("data-url");
+                    await deletePackage(packageId, imageUrl);
+                });
+            }
+
+            const editButtons = document.getElementsByClassName("editButton");
+            for (let button of editButtons) {
+                button.addEventListener("click", async () => {
+                    const packageId = button.getAttribute("data-id");
+                    showEditForm(packageId);
+                });
+            }
+
+            const detailButtons = document.getElementsByClassName("detailButton");
+            for (let button of detailButtons) {
+                button.addEventListener("click", async () => {
+                    const packageId = button.getAttribute("data-id");
+                    await showDetailModal(packageId);
+                });
+            }
+        }
+
+        // Function to delete a package
+        async function deletePackage(packageId, imageUrl) {
+            if (confirm("Apakah Anda yakin ingin menghapus paket ini?")) {
+                try {
+                    await deleteDoc(doc(db, "paket", packageId));
+                    if (imageUrl) {
+                        const imageRef = ref(storage, imageUrl);
+                        await deleteObject(imageRef);
+                    }
+                    alert("Paket berhasil dihapus!");
+                    displayPackages();
+                } catch (error) {
+                    console.error("Error removing document: ", error);
+                }
+            }
+        }
+
+        // Function to show edit form with package data
+        async function showEditForm(packageId) {
+            const packageDoc = doc(db, "paket", packageId);
+            const packageData = (await getDoc(packageDoc)).data();
+
+            const editFormHtml = `
+                <tr id="editFormRow">
+                    <td colspan="6">
+                        <div class="edit-form" id="editForm">
+                            <h3 class="edit-form-title"><i class="fas fa-edit"></i> Edit Paket</h3>
+                            <div class="form-group">
+                                <label for="editName">Nama:</label>
+                                <input type="text" id="editName" value="${packageData.name}">
+                            </div>
+                            <div class="form-group">
+                                <label for="editDescription">Deskripsi:</label>
+                                <textarea id="editDescription" rows="4">${packageData.description}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editPrice">Harga:</label>
+                                <input type="number" id="editPrice" value="${packageData.price.replace('Rp ', '').replace(/\./g, '')}">
+                            </div>
+                            <div class="form-group">
+                                <label for="editStatus">Status:</label>
+                                <select id="editStatus">
+                                    <option value="tersedia" ${packageData.status === 'tersedia' ? 'selected' : ''}>tersedia</option>
+                                    <option value="disewa" ${packageData.status === 'disewa' ? 'selected' : ''}>disewa</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editImage">Gambar:</label>
+                                <input type="file" id="editImage" data-old-url="${packageData.imageUrl}">
+                            </div>
+                            <div class="image-preview">
+                                <img src="${packageData.imageUrl}" alt="Preview Image">
+                            </div>
+                            <div class="action-buttons">
+                                <button class="button saveButton" id="saveButton"><i class="fas fa-save"></i> Simpan</button>
+                                <button class="button cancelButton" id="cancelButton"><i class="fas fa-times"></i> Batal</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            const row = document.getElementById(packageId);
+            row.insertAdjacentHTML("afterend", editFormHtml);
+
+            document.getElementById("saveButton").addEventListener("click", () => {
+                const newName = document.getElementById("editName").value;
+                const newDescription = document.getElementById("editDescription").value;
+                const newPrice = document.getElementById("editPrice").value;
+                const newStatus = document.getElementById("editStatus").value;
+                const newImage = document.getElementById("editImage").files[0];
+                updatePackage(packageId, newName, newDescription, newPrice, newStatus, newImage);
+            });
+
+            document.getElementById("cancelButton").addEventListener("click", () => {
+                document.getElementById("editFormRow").remove();
+            });
+        }
+
+        // Function to update package data
+        async function updatePackage(packageId, newName, newDescription, newPrice, newStatus, newImage) {
+            try {
+                const packageRef = doc(db, "paket", packageId);
+                const packageDoc = await getDoc(packageRef);
+                if (!packageDoc.exists()) {
+                    console.error("No such document!");
+                    return;
+                }
+
+                let imageUrl = packageDoc.data().imageUrl;
+
+                // Update fields if changed
+                if (newImage) {
+                    // Upload new image
+                    const imageFileName = newImage.name;
+                    const imageRef = ref(storage, `images/${imageFileName}`);
+                    await uploadBytes(imageRef, newImage);
+
+                    // Get download URL
+                    imageUrl = await getDownloadURL(imageRef);
+
+                    // Delete old image if exists and different from new image
+                    const oldImageUrl = document.getElementById("editImage").getAttribute("data-old-url");
+                    if (oldImageUrl && oldImageUrl !== imageUrl) {
+                        const oldImageRef = ref(storage, oldImageUrl);
+                        await deleteObject(oldImageRef);
+                    }
+                }
+
+                await updateDoc(packageRef, {
+                    name: newName,
+                    description: newDescription,
+                    price: `Rp ${newPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
+                    status: newStatus,
+                    imageUrl: imageUrl
+                });
+
+                alert("Paket berhasil diperbarui!");
+                document.getElementById("editFormRow").remove();
+                displayPackages();
+            } catch (error) {
+                console.error("Error updating document: ", error);
+            }
+        }
+
+        // Function to show detail modal with package data
+        async function showDetailModal(packageId) {
+            const packageDoc = doc(db, "paket", packageId);
+            const packageData = (await getDoc(packageDoc)).data();
+            const formattedPrice = "Rp " + formatPrice(packageData.price.replace('Rp ', ''));
+
+            document.getElementById("modalName").textContent = packageData.name;
+            document.getElementById("modalDescription").textContent = packageData.description;
+            document.getElementById("modalPrice").textContent = "Harga: " + formattedPrice;
+            document.getElementById("modalImage").src = packageData.imageUrl;
+            document.getElementById("modalStatus").textContent = "Status: " + packageData.status;
+
+            const modal = document.getElementById("detailModal");
+            modal.style.display = "block";
+
+            const closeModal = document.getElementById("closeModal");
+            closeModal.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            window.onclick = function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            };
+        }
+
+        // Display packages on page load
+        displayPackages();
+    </script>
+</body>
+
+</html>

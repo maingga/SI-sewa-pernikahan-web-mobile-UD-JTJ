@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Petugas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        td:last-child {
+            text-align: center;
+        }
+
+        img {
+            max-width: 50px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        img:hover {
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 8px 16px;
+        }
+
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .add-btn {
+            background-color: #1e87f0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 8px 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .add-btn:hover {
+            background-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <i class="icon fas fa-user-shield"></i>Data Petugas
+            <a href="kelola_petugas.html" class="add-btn"><i class="icon fas fa-plus"></i>Tambah Petugas</a>
+        </h1>
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="icon fas fa-user"></i>Username</th>
+                    <th><i class="icon far fa-envelope"></i>Email</th>
+                    <th><i class="icon fas fa-image"></i>Foto Profil</th>
+                    <th><i class="icon fas fa-cogs"></i>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="staffTableBody">
+                <!-- Data petugas akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+        import { getAuth, deleteUser } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getStorage, ref, deleteObject } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app); // Get the Firestore instance
+        const auth = getAuth(app); // Get the Auth instance
+        const storage = getStorage(app); // Get the Storage instance
+
+        // Function to display staff data in table
+        function displayStaff() {
+            const staffRef = collection(db, 'staffs');
+            const staffTableBody = document.getElementById('staffTableBody');
+
+            getDocs(staffRef)
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const staffData = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${staffData.username}</td>
+                            <td>${staffData.email}</td>
+                            <td><img src="${staffData.photoURL}" alt="Foto Profil"></td>
+                            <td><button class="delete-btn" data-staff-id="${doc.id}"><i class="fas fa-trash-alt"></i>Delete</button></td>
+                        `;
+                        staffTableBody.appendChild(row);
+                    });
+
+                    // Add event listeners to delete buttons
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            const staffId = event.target.getAttribute('data-staff-id');
+                            deleteStaff(staffId);
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error displaying staff data:', error);
+                });
+        }
+
+        // Function to delete staff data
+        function deleteStaff(staffId) {
+            const staffRef = doc(db, 'staffs', staffId);
+
+            deleteDoc(staffRef)
+                .then(() => {
+                    console.log('Staff data successfully deleted!');
+
+                    // Delete from Authentication
+                    deleteUser(auth.currentUser)
+                        .then(() => {
+                            console.log('User account deleted from Authentication!');
+                        })
+                        .catch((error) => {
+                            console.error('Error deleting user account from Authentication:', error);
+                        });
+
+                    // Delete from Storage
+                    const storageRef = ref(storage, `profile_photos/${staffId}`);
+                    deleteObject(storageRef)
+                        .then(() => {
+                            console.log('Staff photo successfully deleted from Storage!');
+                        })
+                        .catch((error) => {
+                            console.error('Error deleting staff photo from Storage:', error);
+                        });
+
+                    // Refresh staff table after deletion
+                    document.getElementById('staffTableBody').innerHTML = '';
+                    displayStaff();
+                })
+                .catch((error) => {
+                    console.error('Error deleting staff data:', error);
+                });
+        }
+
+        // Call function to display staff data
+        displayStaff();
+    </script>
+</body>
+</html>

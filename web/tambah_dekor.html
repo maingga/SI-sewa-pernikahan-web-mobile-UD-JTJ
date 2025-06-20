@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Dekor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eaf6ec; /* Background color */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .container h1 {
+            color: #378c5a; /* Heading color */
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="number"],
+        input[type="file"],
+        button,
+        select {
+            margin-bottom: 16px;
+            padding: 10px;
+            border: 1px solid #378c5a; /* Border color */
+            border-radius: 4px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        input[type="number"]:focus,
+        input[type="file"]:focus,
+        select:focus {
+            border-color: #1e593e; /* Border color on focus */
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(30, 89, 62, 0.25); /* Box shadow on focus */
+        }
+
+        button {
+            background-color: #378c5a; /* Button background color */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            border-radius: 4px;
+            font-size: 16px;
+            align-self: flex-start;
+            padding: 12px 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: auto;
+        }
+
+        button:hover {
+            background-color: #1e593e; /* Button background color on hover */
+        }
+
+        .upload-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .upload-label i {
+            margin-right: 8px;
+            color: #378c5a; /* Icon color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tambah Dekorasi Baru</h1>
+        <form id="addDecorationForm">
+            <label for="decorationName">Nama Dekorasi:</label>
+            <input type="text" id="decorationName" name="decorationName" required>
+
+            <label for="decorationDescription">Deskripsi Dekorasi:</label>
+            <textarea id="decorationDescription" name="decorationDescription" rows="4" required></textarea>
+
+            <label for="decorationPrice">Harga Dekorasi (Rp):</label>
+            <input type="number" id="decorationPrice" name="decorationPrice" required>
+
+            <label for="decorationStatus">Status Dekorasi:</label>
+            <select id="decorationStatus" name="decorationStatus" required>
+                <option value="tersedia">Tersedia</option>
+                <option value="disewa">Disewa</option>
+            </select>
+
+            <label for="decorationImage" class="upload-label">
+                <i class="fas fa-image"></i> Pilih Gambar Dekorasi:
+            </label>
+            <input type="file" id="decorationImage" name="decorationImage" accept="image/*" required>
+
+            <button type="submit">
+                <i class="fas fa-plus"></i> Tambah Dekorasi
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Handle form submission
+        const form = document.getElementById('addDecorationForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const decorationName = form.decorationName.value;
+            const decorationDescription = form.decorationDescription.value;
+            const decorationPrice = form.decorationPrice.value;
+            const decorationStatus = form.decorationStatus.value;
+            const decorationImageFile = form.decorationImage.files[0];
+
+            // Upload image to Firebase Storage
+            const storageRef = ref(storage, 'decorationImages/' + decorationImageFile.name);
+            await uploadBytes(storageRef, decorationImageFile);
+            const imageUrl = await getDownloadURL(storageRef);
+
+            // Add decoration to Firestore
+            await addDoc(collection(db, 'dekor'), {
+                name: decorationName,
+                description: decorationDescription,
+                price: "Rp " + parseFloat(decorationPrice),
+                status: decorationStatus,
+                imageUrl: imageUrl
+            });
+
+            // Reset form after successful addition
+            form.reset();
+            alert('Decoration added successfully!');
+        });
+    </script>
+</body>
+</html>

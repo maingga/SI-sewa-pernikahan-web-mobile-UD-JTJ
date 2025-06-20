@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Petugas</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f7f4; /* Warna latar belakang */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #008000; /* Warna judul */
+            margin-bottom: 20px;
+        }
+
+        /* Form style */
+        form {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="file"],
+        input[type="submit"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #008000; /* Warna border */
+            border-radius: 4px;
+            background-color: #f0f7f4; /* Warna input */
+            color: #333; /* Warna teks */
+            font-size: 16px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px; /* Jarak tambahan dari input lain */
+        }
+
+        input[type="submit"] {
+            background-color: #008000; /* Warna latar tombol */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s; /* Animasi perubahan warna */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #005200; /* Warna latar tombol saat dihover */
+        }
+
+        /* Image preview style */
+        #imagePreview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #imagePreview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        /* Icon style */
+        .icon {
+            margin-right: 5px;
+            color: #008000; /* Warna icon */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kelola Petugas</h1>
+        <!-- Formulir untuk menambah data petugas -->
+        <form id="addStaffForm">
+            <label for="username"> <i class="fas fa-user icon"></i> Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <label for="email"> <i class="fas fa-envelope icon"></i> Email:</label><br>
+            <input type="email" id="email" name="email"><br>
+            <label for="password"> <i class="fas fa-lock icon"></i> Password:</label><br>
+            <input type="password" id="password" name="password"><br>
+            <label for="photo"> <i class="fas fa-image icon"></i> Foto Profil:</label><br>
+            <input type="file" id="photo" name="photo"><br>
+            <input type="submit" value="Tambah Petugas">
+        </form>
+        <!-- Preview gambar -->
+        <div id="imagePreview">
+            <img id="previewImg" src="#" alt="Foto Profil" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app); // Dapatkan instance Auth
+        const storage = getStorage(app); // Dapatkan instance Storage
+        const db = getFirestore(app); // Dapatkan instance Firestore
+
+        // Fungsi untuk menambah data petugas
+        function addStaff() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const photo = document.getElementById('photo').files[0];
+
+            // Daftarkan petugas baru dengan email dan password
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Berhasil menambahkan petugas baru
+                    console.log('Petugas berhasil ditambahkan:', userCredential.user.uid);
+                    // Unggah foto ke Firebase Storage
+                    const storageRef = ref(storage, 'profile_photos/' + userCredential.user.uid);
+                    const uploadTask = uploadBytes(storageRef, photo);
+
+                    // Tangani progres, keberhasilan, dan kesalahan
+                    uploadTask.then((snapshot) => {
+                        console.log('Unggahan selesai');
+                        // Dapatkan URL unduhan dan tambahkan data petugas ke Firestore
+                        getDownloadURL(snapshot.ref).then((downloadURL) => {
+                            console.log('File tersedia di', downloadURL);
+                            // Tambahkan data petugas ke Firestore
+                            setDoc(doc(collection(db, 'staffs'), userCredential.user.uid), {
+                                username: username,
+                                email: email,
+                                photoURL: downloadURL // Simpan URL foto di Firestore
+                            })
+                            .then(() => {
+                                console.log('Data petugas ditambahkan ke Firestore.');
+                                alert('Petugas berhasil ditambahkan!');
+                                // Bersihkan formulir setelah menambahkan petugas
+                                document.getElementById('addStaffForm').reset();
+                                // Bersihkan pratinjau gambar
+                                document.getElementById('previewImg').style.display = 'none';
+                            })
+                            .catch((error) => {
+                                console.error('Kesalahan menambahkan data petugas:', error);
+                                alert('Terjadi kesalahan. Silakan coba lagi.');
+                            });
+                        });
+                    }).catch((error) => {
+                        // Kesalahan
+                        console.error('Kesalahan mengunggah foto:', error);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Kesalahan membuat petugas baru:', error);
+                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                });
+        }
+
+        // Event listener untuk pengiriman formulir
+        document.getElementById('addStaffForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Mencegah pengiriman formulir
+            addStaff(); // Panggil fungsi untuk menambahkan petugas
+        });
+
+        // Event listener untuk menampilkan pratinjau gambar sebelum diunggah
+        document.getElementById('photo').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewImg').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>

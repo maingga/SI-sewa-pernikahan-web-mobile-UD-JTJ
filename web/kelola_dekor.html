@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Dekor</title>
+    <!-- Tambahkan CSS untuk mempercantik tampilan -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <style>
+        /* Gaya CSS */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #254e27;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .button {
+            background-color: #254e27;
+            /* Warna hijau */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button.add {
+            background-color: #254e27;
+            /* Warna hijau */
+        }
+
+        .button.edit,
+        .button.delete {
+            background-color: #ff3333;
+            /* Warna merah */
+        }
+
+        .button i {
+            margin-right: 5px;
+        }
+
+        .edit-form {
+            border: 2px solid #254e27;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="file"],
+        .form-group select {
+            width: calc(100% - 10px);
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="file"]:focus,
+        .form-group select:focus {
+            border-color: #254e27;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            text-align: center;
+        }
+
+        .action-buttons .button {
+            margin-right: 10px;
+        }
+
+        .edit-form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #254e27;
+        }
+
+        .edit-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-form .form-group label {
+            margin-bottom: 5px;
+        }
+
+        .edit-form .form-group input[type="text"],
+        .edit-form .form-group input[type="number"],
+        .edit-form .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .edit-form .form-group input[type="text"]:focus,
+        .edit-form .form-group input[type="number"]:focus,
+        .edit-form .form-group select:focus {
+            border-color: #254e27;
+        }
+
+        .edit-form .image-preview {
+            text-align: center;
+        }
+
+        .edit-form .image-preview img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .add-decoration-button {
+            align-self: flex-end;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2><i class="fas fa-tools"></i> Kelola Dekor</h2>
+        <!-- Tombol untuk menambah dekorasi baru -->
+        <button class="button add add-decoration-button" id="addDecorationButton"><i class="fas fa-plus"></i> Tambah Dekor</button>
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-heading"></i> Nama</th>
+                    <th><i class="fas fa-info-circle"></i> Deskripsi</th>
+                    <th><i class="fas fa-dollar-sign"></i> Harga</th>
+                    <th><i class="fas fa-image"></i> Gambar</th>
+                    <th><i class="fas fa-toggle-on"></i> Status</th>
+                    <th><i class="fas fa-cogs"></i> Tindakan</th>
+                </tr>
+            </thead>
+            <tbody id="decorationTableBody">
+                <!-- Data dari Firestore akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+        import { getStorage, ref, deleteObject, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4eG_wsWnhfJcH1uxcEL-4EWKRO6B7CZw",
+            authDomain: "jokotarubjingga.firebaseapp.com",
+            projectId: "jokotarubjingga",
+            storageBucket: "jokotarubjingga.appspot.com",
+            messagingSenderId: "314491904917",
+            appId: "1:314491904917:web:72c50481ee7a68f0b5cc9c",
+            measurementId: "G-S81G53WE6Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Function to display decorations from Firestore
+        async function displayDecorations() {
+            const decorationTableBody = document.getElementById("decorationTableBody");
+            const querySnapshot = await getDocs(collection(db, "dekor"));
+            querySnapshot.forEach((doc) => {
+                const decorationData = doc.data();
+                const formattedPrice = decorationData.price.toLocaleString('id-ID'); // Ubah format harga dengan separator ribuan
+                const row = `
+                    <tr>
+                        <td>${decorationData.name}</td>
+                        <td>${decorationData.description}</td>
+                        <td>Rp ${formattedPrice}</td> <!-- Tampilkan harga dengan format baru -->
+                        <td><img src="${decorationData.imageUrl}" alt="${decorationData.name}" width="100"></td>
+                        <td>${decorationData.status}</td>
+                        <td>
+                            <!-- Tombol untuk mengedit dekorasi -->
+                            <button class="button deleteButton" data-id="${doc.id}" data-url="${decorationData.imageUrl}"><i class="fas fa-trash-alt"></i> Hapus</button>
+                            <button class="button editButton" data-id="${doc.id}"><i class="fas fa-edit"></i> Edit</button>
+                        </td>
+                    </tr>
+                `;
+                decorationTableBody.innerHTML += row;
+            });
+        }
+
+        // Function to update decoration data in Firestore
+        async function updateDecoration(decorationId, newName, newDescription, newPrice, newStatus, newImage) {
+            try {
+                let imageUrl = document.querySelector("input#editImage").dataset.oldUrl;
+                const formattedPrice = parseFloat(newPrice.replace(/[^\d.-]/g, '')); // Mengonversi harga menjadi angka
+
+                // Jika ada gambar baru yang dipilih, unggah gambar ke Firebase Storage
+                if (newImage) {
+                    const imageRef = ref(storage, `decorationImages/${newImage.name}`);
+                    await uploadBytes(imageRef, newImage);
+                    imageUrl = await getDownloadURL(imageRef);
+                }
+
+                // Perbarui data dekorasi di Firestore
+                await updateDoc(doc(db, "dekor", decorationId), {
+                    name: newName,
+                    description: newDescription,
+                    price: formattedPrice, // Simpan harga sebagai angka ke Firebase
+                    status: newStatus,
+                    imageUrl: imageUrl
+                });
+
+                // Jika ada gambar baru, hapus gambar lama dari Firebase Storage
+                const oldImageUrl = document.querySelector("input#editImage").dataset.oldUrl;
+                if (oldImageUrl && newImage) {
+                    const oldImageRef = ref(storage, oldImageUrl);
+                    await deleteObject(oldImageRef);
+                }
+
+                // Memuat ulang halaman setelah pengeditan selesai
+                location.reload();
+            } catch (error) {
+                console.error("Error updating decoration: ", error);
+            }
+        }
+
+        // Function to delete decoration from Firestore and Storage
+        async function deleteDecoration(decorationId, imageUrl) {
+            try {
+                // Konfirmasi sebelum menghapus
+                const confirmDelete = window.confirm("Apakah Anda yakin ingin menghapus dekorasi ini?");
+                if (confirmDelete) {
+                    // Hapus data dekorasi dari Firestore
+                    await deleteDoc(doc(db, "dekor", decorationId));
+
+                    // Jika URL gambar disediakan, hapus gambar dari Storage
+                    if (imageUrl) {
+                        const imageRef = ref(storage, imageUrl);
+                        await deleteObject(imageRef);
+                    }
+
+                    // Muat ulang halaman setelah penghapusan
+                    location.reload();
+                }
+            } catch (error) {
+                console.error("Error deleting decoration: ", error);
+            }
+        }
+
+        // Handle click event on edit buttons
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("editButton")) {
+                const decorationId = event.target.dataset.id;
+                const row = event.target.closest("tr");
+                const name = row.querySelector("td:nth-child(1)").innerText;
+                const description = row.querySelector("td:nth-child(2)").innerText;
+                const price = row.querySelector("td:nth-child(3)").innerText;
+                const status = row.querySelector("td:nth-child(5)").innerText;
+                const imageUrl = row.querySelector("td:nth-child(4) img").getAttribute("src");
+
+                const editForm = `
+                    <td colspan="6" class="edit-form">
+                        <div class="edit-form-title">Edit Dekorasi</div>
+                        <div class="form-group">
+                            <label for="editName">Nama:</label>
+                            <input type="text" id="editName" value="${name}" placeholder="Nama">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDescription">Deskripsi:</label>
+                            <input type="text" id="editDescription" value="${description}" placeholder="Deskripsi">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPrice">Harga:</label>
+                            <input type="number" id="editPrice" value="${parseFloat(price.replace(/[^\d.-]/g, ''))}" placeholder="Harga">
+                        </div>
+                        <div class="form-group">
+                            <label for="editStatus">Status:</label>
+                            <select id="editStatus">
+                                <option value="tersedia" ${status === 'tersedia' ? 'selected' : ''}>Tersedia</option>
+                                <option value="disewa" ${status === 'disewa' ? 'selected' : ''}>Disewa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editImage">Gambar:</label>
+                            <div class="image-preview">
+                                <img src="${imageUrl}" alt="${name}">
+                            </div>
+                            <input type="file" id="editImage" data-old-url="${imageUrl}">
+                        </div>
+                        <div class="action-buttons">
+                            <button class="button saveButton" data-id="${decorationId}"><i class="fas fa-save"></i> Simpan</button>
+                            <button class="button cancelButton"><i class="fas fa-times"></i> Batal</button>
+                        </div>
+                    </td>
+                `;
+                row.innerHTML = editForm;
+            } else if (event.target.classList.contains("saveButton")) {
+                const decorationId = event.target.dataset.id;
+                const newName = document.getElementById("editName").value;
+                const newDescription = document.getElementById("editDescription").value;
+                const newPrice = document.getElementById("editPrice").value;
+                const newStatus = document.getElementById("editStatus").value;
+                const newImage = document.getElementById("editImage").files[0];
+                updateDecoration(decorationId, newName, newDescription, newPrice, newStatus, newImage);
+            } else if (event.target.classList.contains("cancelButton")) {
+                location.reload();
+            } else if (event.target.classList.contains("deleteButton")) {
+                const decorationId = event.target.dataset.id;
+                const imageUrl = event.target.dataset.url; // Dapatkan URL gambar
+                deleteDecoration(decorationId, imageUrl); // Berikan URL gambar ke fungsi
+            }
+        });
+
+        // Panggil fungsi untuk menampilkan dekorasi
+        displayDecorations();
+
+        // Handle click event on "Tambah Dekor" button
+        document.getElementById("addDecorationButton").addEventListener("click", function() {
+            window.location.href = "tambah_dekor.html";
+        });
+    </script>
+</body>
+
+</html>
